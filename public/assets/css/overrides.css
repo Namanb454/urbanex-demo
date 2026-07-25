@@ -1,0 +1,79 @@
+/* Reimplements the JS-driven pinning/reveal that the original main.js performed
+   with GSAP ScrollTrigger, so the static CSS layout behaves the same. */
+
+/* PLAN: pin the floor-plan while the detail column scrolls past it.
+   The floor-plan shrinks toward the left (JS-driven scale) as the detail
+   column overlaps in from the right. */
+.planStage { position: relative; }
+@media screen and (min-width: 769px) {
+  #planImg {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  #planBody {
+    position: relative;
+    z-index: 2;
+    margin-top: -100vh;
+  }
+}
+
+/* Elements the original faded in via JS (inline opacity:0). */
+#main { opacity: 1 !important; }
+#footer { opacity: 1 !important; }
+
+/* FUTURE concept diagram: pin the diagram and run the 3 stages on scroll. */
+.conceptDiagram { position: relative; }
+.futureStage {
+  position: relative;
+  height: 340vh; /* scroll length that drives the 3-stage timeline */
+}
+.futurePin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.conceptCaptions {
+  position: relative;
+  width: min(90vw, 748px);
+  margin-top: 28px;
+  height: 60px;
+}
+.conceptCaption {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+}
+.conceptCaption img { width: 100%; height: auto; object-fit: contain; }
+@media screen and (max-width: 768px) {
+  .futureStage { height: 300vh; }
+}
+
+/* VOICE: pin the section and translate the card row horizontally as the
+   user scrolls vertically (original drove this transform via JS). */
+.voice { overflow: visible; } /* allow the pin to stick; the wrap clips horizontally */
+.voiceStage { position: relative; }
+.voiceListWrap {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+/* NAV: smooth open/close (original animated this via GSAP). */
+.nav {
+  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: scale(0.94);
+  pointer-events: none;
+}
+.is-navOpen .nav {
+  transform: scale(1);
+  pointer-events: auto;
+}

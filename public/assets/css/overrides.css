@@ -52,19 +52,35 @@
 }
 .conceptCaption img { width: 100%; height: auto; object-fit: contain; }
 @media screen and (max-width: 768px) {
-  .futureStage { height: 300vh; }
+  .futureStage { height: 200vh; }
+  .futurePin { height: 100svh; }
 }
 
-/* VOICE: pin the section and translate the card row horizontally as the
-   user scrolls vertically (original drove this transform via JS). */
+/* VOICE: desktop pins the section and translates the card row horizontally as
+   the user scrolls vertically. On mobile that pin wastes a lot of vertical
+   space (a 100vh pin around a short card), so mobile uses a native swipe row. */
 .voice { overflow: visible; } /* allow the pin to stick; the wrap clips horizontally */
 .voiceStage { position: relative; }
-.voiceListWrap {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: flex;
-  align-items: center;
+@media screen and (min-width: 769px) {
+  .voiceListWrap {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+}
+@media screen and (max-width: 768px) {
+  /* natural height, swipe horizontally instead of the pinned scroll */
+  .voiceListWrap {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .voiceListWrap::-webkit-scrollbar { display: none; }
+  .voiceDetail { scroll-snap-align: center; }
 }
 
 /* NAV: smooth open/close (original animated this via GSAP). */

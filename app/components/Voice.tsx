@@ -117,16 +117,20 @@ export default function Voice() {
   const listRef = useRef<HTMLDivElement>(null);
   const [x, setX] = useState(0);
   const [stageH, setStageH] = useState<number | undefined>(undefined);
+  const [mobile, setMobile] = useState(false);
 
-  // Vertical scroll through the pinned stage translates the card row
-  // horizontally — reimplements the original's scroll-driven `voiceList`.
+  // Desktop: vertical scroll through the pinned stage translates the card row
+  // horizontally. Mobile: skip the pin entirely and let the row be a native
+  // swipe (handled by CSS), so the section is only as tall as a card.
   useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
     const travel = () => {
       const list = listRef.current;
       if (!list) return 0;
       return Math.max(0, list.scrollWidth - window.innerWidth);
     };
     const onScroll = () => {
+      if (mq.matches) return;
       const stage = stageRef.current;
       if (!stage) return;
       const rect = stage.getBoundingClientRect();
@@ -134,18 +138,27 @@ export default function Voice() {
       const p = total > 0 ? clamp(-rect.top / total) : 0;
       setX(p * travel());
     };
-    const onResize = () => {
+    const recalc = () => {
+      if (mq.matches) {
+        setMobile(true);
+        setStageH(undefined);
+        setX(0);
+        return;
+      }
+      setMobile(false);
       setStageH(travel() + window.innerHeight);
       onScroll();
     };
-    onResize();
+    recalc();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
+    window.addEventListener("resize", recalc);
+    mq.addEventListener("change", recalc);
     // Re-measure once images have loaded (card widths depend on them).
-    const t = setTimeout(onResize, 600);
+    const t = setTimeout(recalc, 600);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("resize", recalc);
+      mq.removeEventListener("change", recalc);
       clearTimeout(t);
     };
   }, []);
@@ -188,7 +201,7 @@ export default function Voice() {
             id="voiceList"
             className="voiceList l-inner"
             ref={listRef}
-            style={{ transform: `translate3d(${-x}px,0,0)` }}
+            style={{ transform: mobile ? undefined : `translate3d(${-x}px,0,0)` }}
           >
             {ITEMS.map((item) => (
               <section id={item.id} className="voiceDetail" key={item.id}>
